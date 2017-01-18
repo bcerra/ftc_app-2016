@@ -24,7 +24,7 @@ public class ActualRobotStuff extends com.qualcomm.robotcore.eventloop.opmode.Op
         motorFR = hardwareMap.dcMotor.get("motor_2");
         motorBL = hardwareMap.dcMotor.get("motor_3");
         motorBR = hardwareMap.dcMotor.get("motor_4");
-        motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFL.setDirection(DcMotorSimple.Direction.FORWARD);
         motorFR.setDirection(DcMotorSimple.Direction.FORWARD);
         motorBR.setDirection(DcMotorSimple.Direction.FORWARD);
         motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
