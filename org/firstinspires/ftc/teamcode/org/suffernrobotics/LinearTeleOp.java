@@ -2,91 +2,117 @@ package org.firstinspires.ftc.teamcode.org.suffernrobotics;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "TeleOp", group = "OpModes")
-public class LinearTeleOp extends LinearOpMode{
+public class LinearTeleOp extends LinearOpMode {
 
-    //Variable creation
-    Servo leftServo, rightServo;
-    DcMotor motorFL, motorFR, motorBL, motorBR,motorSW,motorSH;
-    double rPos, lPos = 0;
+    DcMotor a, b, c, d, sweep, flick;
+    Servo left, right;
 
-    //returns zero if there is a math error in the input, otherwise returns the input
+    ColorSensor c1;
+    GyroSensor g1;
+    OpticalDistanceSensor o1;
+
+    double servoPosition=0;
+
+    public void initHardware() {
+        //Initialize servos
+        left = hardwareMap.servo.get("l");
+        right = hardwareMap.servo.get("r");
+
+        //Initialize motors
+        a = hardwareMap.dcMotor.get("a");
+        b = hardwareMap.dcMotor.get("b");
+        c = hardwareMap.dcMotor.get("c");
+        d = hardwareMap.dcMotor.get("d");
+        sweep = hardwareMap.dcMotor.get("s");
+        flick = hardwareMap.dcMotor.get("f");
+
+        c1 = hardwareMap.colorSensor.get("c1");
+        g1 = hardwareMap.gyroSensor.get("g1");
+        o1 = hardwareMap.opticalDistanceSensor.get("o1");
+
+    }
+
     public double makeANumber(double number) {
         if (Double.isNaN(number))
             return 0;
         return number;
     }
 
-    public void maphardware() {
-        //Initialize servos
-        rightServo = hardwareMap.servo.get("servo_1");
-        leftServo = hardwareMap.servo.get("servo_2");
-        //Initialize motors
-        motorFL = hardwareMap.dcMotor.get("motor_1");
-        motorFR = hardwareMap.dcMotor.get("motor_2");
-        motorBL = hardwareMap.dcMotor.get("motor_3");
-        motorBR = hardwareMap.dcMotor.get("motor_4");
-        motorSW = hardwareMap.dcMotor.get("motor_5");
-        motorSH = hardwareMap.dcMotor.get("motor_6");
-        //Makes sure motors are initilized to move in the correct direction(for some autonomous
-        // programs, the direction is changed)
-        motorFL.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFR.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBR.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
-
-    }
-
     @Override
-    public void runOpMode() {
-        maphardware();
+    public void runOpMode(){
+        initHardware();
+        double rPos = .5, lPos = 1;
+
         waitForStart();
-        while (opModeIsActive()) {
-            //Increases or decreases the variable for the locally stored position of the servo based
-            //on the gamepad input
-            rPos -= gamepad2.right_stick_x/50;
+
+        while(opModeIsActive()){
+
+            /*rPos += gamepad2.right_stick_x/50;
             lPos += gamepad2.left_stick_x/50;
-            //Makes sure that both positions are within the 0-1 range of the servo, and if not,
-            //fixes it
+
             rPos = Range.clip(rPos, 0, 1);
             lPos = Range.clip(lPos, 0, 1);
-            //Set the position of the servos to the locally stored variable(.923 and .077 is because
-            // we are utilizing winch servos)
-            rightServo.setPosition(1-(rPos*.077));
-            leftServo.setPosition(.923+(lPos*.077));
-            //Gets gamepad input and applies necessary math functions in order to make input useable
-            //by the mechanum wheels
+
+            right.setPosition(1-(rPos*.077));
+            left.setPosition(.923+(lPos*.077));*/
+
             double x = gamepad1.left_stick_x;
             double y = gamepad1.left_stick_y;
+
             double rotatedX = (Math.sqrt(2) / 2) * (x + y);
             double rotatedY = (Math.sqrt(2) / 2) * (-x + y);
-            //Scales the values such that it is possible for the motor values to go at max speed
+
             double x2 = Math.pow(rotatedX, 2);
             double y2 = Math.pow(rotatedY, 2);
+
             double cts = makeANumber(Math.sqrt((x2 + y2) / Math.max(x2, y2)));
+
             double xScaled = rotatedX * cts;
             double yScaled = rotatedY * cts;
-            //Gets joystick 2 input
             double turn = gamepad1.right_stick_x;
-            //Sets the power of each motor based on the input which the math has been applied to
-            motorFL.setPower(((yScaled)) + (turn));
-            motorFR.setPower(((-xScaled)) + (turn));
-            motorBL.setPower(((xScaled)) + (turn));
-            motorBR.setPower(((-yScaled)) + (turn));
-            //Move sweeper based on trigger inputs
-            motorSW.setPower(gamepad1.left_trigger-gamepad1.right_trigger);
-            //move sweeper if the x button is pressed
-            if(gamepad1.x) {
-                motorSH.setPower(-1);
-            }else{
-                motorSH.setPower(0);
+
+            a.setPower(((yScaled)) + (turn));
+            b.setPower(((-xScaled)) + (turn));
+            c.setPower(((xScaled)) + (turn));
+            d.setPower(((-yScaled)) + (turn));
+
+            if(gamepad1.right_bumper) {
+                sweep.setPower(1);
             }
+            if(gamepad1.left_bumper) {
+                sweep.setPower(-1);
+            }
+            else {
+                sweep.setPower(0);
+            }
+            if (gamepad1.right_trigger > .75){
+                flick.setPower(-1);
+            } else if(gamepad1.left_trigger > .75){
+                flick.setPower(1);
+            }
+            else {
+                flick.setPower(0);
+            }
+
+            if(gamepad2.x)
+                servoPosition+=.05;
+
+            if(gamepad2.b)
+                servoPosition+=.05;
+
+            servoPosition=Range.clip(servoPosition,0,.15);
+            rPos = .5+servoPosition;
+            lPos = 1-servoPosition;
+            right.setPosition(Range.clip(rPos, 0, 1));
+            left.setPosition(Range.clip(lPos, 0, 1));
         }
     }
 }
-

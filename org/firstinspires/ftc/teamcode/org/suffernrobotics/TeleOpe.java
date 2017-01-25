@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "TeleOpe", group = "OpModes")
+@TeleOp(name = "BackupTeleOp", group = "OpModes")
 public class TeleOpe extends LinearOpMode {
 
     DcMotor a, b, c, d, sweep, flick, lift;
